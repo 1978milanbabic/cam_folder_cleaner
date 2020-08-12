@@ -1,0 +1,49 @@
+{
+  "name": "cam_folder_cleaner",
+  "version": "0.1.0",
+  "description": "Node server and worker that cleans unwanted short videos from 'motion.py' (server with admin page)",
+  "main": "main.js",
+  "private": true,
+  "dependencies": {
+    "http-proxy-middleware": "^0.20.0",
+    "react": "^16.8.4",
+    "react-dom": "^16.8.4"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.10",
+    "react-scripts": "^2.1.8",
+    "wait-on": "^3.2.0",
+    "yargs": "^13.2.2"
+  },
+  "scripts": {
+    "start": "node bin/node-react-scripts start",
+    "browser": "node bin/node-react-scripts browser",
+    "build": "node bin/node-react-scripts build",
+    "test": "react-scripts test --env=jsdom"
+  },
+  "build": {
+    "appId": "cam_folder_cleaner",
+    "productName": "cam_folder_cleaner",
+    "directories": {
+      "buildResources": "assets"
+    },
+    "mac": {
+      "category": "public.app-category.utilities"
+    },
+    "extends": null,
+    "asar": false
+  },
+  "keywords": [
+    "node",
+    "react",
+    "boilerplate"
+  ],
+  "author": "Milan Babic",
+  "license": "MIT",
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
+  ]
+}
