@@ -3,22 +3,48 @@ import React, { Fragment, useEffect, useState } from 'react'
 // import io from 'socket.io-client'
 import {
   Segment,
-  Header
+  Header,
+  Dimmer,
+  Loader,
+  Image
 } from 'semantic-ui-react'
 
+// import styles
+import './style.css'
+
 const Home = () => {
-  // has medias?
-  const [hasMedias, setHasMedias] = useState()
+  // medias loaded?
+  const [mediasLoaded, setMediasLoaded] = useState(false)
   // medias info list
-  const [medias, setMedias] = useState()
-  // load medias list
+  const [medias, setMedias] = useState([])
+  // log loaded?
+  const [logLoaded, setLogLoaded] = useState(false)
+  // log as array
+  const [log, setLog] = useState([])
+
+  // load log & medias list
   useEffect(() => {
-    fetch('/api/medias', {credentials: 'same-origin'})
+    // load logs
+    fetch('/api/motion/log', {credentials: 'same-origin'})
+      .then(res => res.json())
+      .then(logs => {
+        // obtained medias list
+        setLogLoaded(true)
+        if (Array.isArray(logs) && logs.length > 0) {
+          setLog([ ...logs ])
+        } else {
+          setLog(['No log file to load ...'])
+          console.log('No logs ...')
+        }
+      })
+    // load medias (create list of medias)
+    fetch('/api/motion/medias', {credentials: 'same-origin'})
       .then(res => res.json())
       .then(medias => {
+        // obtained medias list
+        setMediasLoaded(true)
         if (Array.isArray(medias)) {
-          // setMedias({ medias })
-          console.log(medias)
+          setMedias([ ...medias ])
         } else {
           console.log('No Medias')
         }
@@ -26,15 +52,35 @@ const Home = () => {
   }, [])
 
   return (
-    // <Fragment>
-    //   <Header attached='top'>Home page</Header>
-    //   <Segment attached='bottom'>
-    //     {}
-    //   </Segment>
-    // </Fragment>
-    <Segment.Group raised>
-      <Segment><h2>Cam Recordings</h2></Segment>
-      <Segment><p>fdsfd</p></Segment>
+    <Segment.Group raised className='top-segment'>
+
+      <Header attached='top' textAlign='center'>Home</Header>
+
+      {/* Log */}
+      <Segment>Log</Segment>
+      <Segment style={{
+        maxHeight: '10rem',
+        overflowY: 'auto'
+      }}>
+        {!logLoaded && log ? ('Loading ...') :
+          log.map((lg, i) => (<p key={i}>{lg}</p>))
+        }
+      </Segment>
+
+      {/* Medias */}
+      <Segment>
+        Video Recordings
+      </Segment>
+      <Segment attached='bottom'>
+        {!mediasLoaded ?
+          <Fragment>
+            Loading ...
+          </Fragment>
+          :
+          medias && medias.map((media, i) => <video key={i} src={media.url} width='100%' controls></video>)
+        }
+      </Segment>
+
     </Segment.Group>
   )
 }

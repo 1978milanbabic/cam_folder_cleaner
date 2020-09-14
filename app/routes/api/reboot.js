@@ -8,7 +8,6 @@ const router = express.Router()
 router.use(bodyParser.json())
 
 router.get('/', (req, res, next) => {
-  console.log('I\'m in api')
   // correct response
   res.jsonp({system: 'reboot'})
   // reboot

@@ -9,7 +9,7 @@ import {
 
 // scenes
 import Home from './scenes/Home'
-import Reboot from './scenes/Reboot'
+import Config from './scenes/Config'
 
 // styles
 import 'semantic-ui-css/semantic.min.css'
@@ -17,11 +17,14 @@ import './App.css'
 
 class App extends Component {
   doReboot = () =>  {
-    fetch('/api/reboot', {credentials: 'same-origin'})
+    let ruSure = window.confirm('This will reboot system!')
+    if (ruSure) {
+      fetch('/api/reboot', {credentials: 'same-origin'})
       .then(res => res.json())
       .then(response => {
         console.log(response)
       })
+    }
   }
   render () {
     return (
@@ -29,7 +32,10 @@ class App extends Component {
         <Router>
           <Responsive as={Menu} fixed='top'>
             <Menu.Item as={NavLink} to='/' exact>
-              Recordings
+              Home
+            </Menu.Item>
+            <Menu.Item as={NavLink} to='/config' exact>
+              Configuration
             </Menu.Item>
             <Menu.Item  position='right'>
               <Button onClick={this.doReboot}>Reboot</Button>
@@ -38,7 +44,7 @@ class App extends Component {
           <Container>
             <Switch>
               <Route path='/' exact component={Home}></Route>
-              {/* <Route path='/reboot' component={Reboot}></Route> */}
+              <Route path='/config' component={Config}></Route>
             </Switch>
           </Container>
         </Router>
