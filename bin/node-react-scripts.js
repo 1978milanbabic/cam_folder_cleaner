@@ -10,7 +10,7 @@ const pjson = require('../package.json')
 // ensure server port
 const ports = {
   http: process.env.REACT_PORT || 1337,
-  react: process.env.REACT_PORT || 3000
+  react: process.env.REACT_PORT || 1234
 }
 
 // node bin

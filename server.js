@@ -36,8 +36,11 @@ if (isDev) {
   app.use(express.static(path.join(__dirname, 'build')))
 }
 
-// mount routes
+// mount routes - admin (password-protected)
 app.use('/', require('./app/routes'))
+
+// mount api (password-protected) routes
+app.use('/api', require('./app/routes/api'))
 
 // mount react app route
 let reactIndex = path.join(__dirname, 'build', 'index.html')
