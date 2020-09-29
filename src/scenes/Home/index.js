@@ -1,12 +1,23 @@
 import React, { Fragment, useEffect, useState } from 'react'
-// import _ from 'lodash'
+import moment from 'moment'
+import _ from 'lodash'
 // import io from 'socket.io-client'
+import filesize from 'filesize'
+
+// semantic
 import {
   Segment,
   Header,
   Dimmer,
   Loader,
-  Image
+  Image,
+  Card,
+  Button,
+  Label,
+  Menu,
+  Responsive,
+  Icon,
+  Dropdown
 } from 'semantic-ui-react'
 
 // import styles
@@ -16,11 +27,13 @@ const Home = () => {
   // medias loaded?
   const [mediasLoaded, setMediasLoaded] = useState(false)
   // medias info list
-  const [medias, setMedias] = useState([])
+  const [medias, setMedias] = useState()
   // log loaded?
   const [logLoaded, setLogLoaded] = useState(false)
   // log as array
   const [log, setLog] = useState([])
+  // dates
+  const [dates, setDates] = useState([])
 
   // load log & medias list
   useEffect(() => {
@@ -40,24 +53,91 @@ const Home = () => {
     // load medias (create list of medias)
     fetch('/api/motion/medias', {credentials: 'same-origin'})
       .then(res => res.json())
-      .then(medias => {
+      .then(meds => {
         // obtained medias list
         setMediasLoaded(true)
-        if (Array.isArray(medias)) {
-          setMedias([ ...medias ])
+        if (Array.isArray(meds) && meds.length > 0) {
+          let loadedMedias = [ ...meds ]
+          loadedMedias.map(m => {
+            let date = moment(m.created_at).local()
+            m.day = date.format('DD-MMM-YYYY')
+            m.hour = date.format('HH:mm:ss')
+            m.time = date.toDate().getTime()
+            return m
+          })
+          // state medias = { 'date': [ ...mediasOrderedByTime ], ... }
+          let dates = [ ...new Set(loadedMedias.map(d => d.day)) ]
+          let reverseDates = dates.reverse()
+          setDates(reverseDates)
+
+          let mediasOrderedByDate = {}
+          // create keys by unique day
+          reverseDates.forEach(dat => {
+            mediasOrderedByDate[dat] = []
+          })
+          // order loaded by time
+          loadedMedias.sort((a, b) => b.time - a.time)
+          // create entries by date
+          loadedMedias.forEach(ent => {
+            ent.selected = false
+            mediasOrderedByDate[ent.day].push(ent)
+          })
+          // fix size and lenght!!!!            !!!!!!!!!!!!!1
+
+          console.log(mediasOrderedByDate)
+          setMedias({ ...mediasOrderedByDate })
         } else {
           console.log('No Medias')
         }
       })
   }, [])
 
+  // corner individual media select btn
+  const handleClickSelectOne = (day, name) => {
+    let changedMedias = _.cloneDeep(medias)
+    changedMedias[day].map(med => {
+      if (med.name === name) med.selected = !med.selected
+    })
+    setMedias({ ...changedMedias })
+  }
+  // select all medias by day btn
+  const handleSelectAllMediasByDay = day => {
+    let changedMedias = _.cloneDeep(medias)
+    changedMedias[day].map(med => {
+      med.selected = true
+    })
+    setMedias({ ...changedMedias })
+  }
+  // unselect all medias by day btn
+  const handleUnselectAllMediasByDay = day => {
+    let changedMedias = _.cloneDeep(medias)
+    changedMedias[day].map(med => {
+      med.selected = false
+    })
+    setMedias({ ...changedMedias })
+  }
+  // move selected medias btn
+  const handleMoveSelectedMedias = day => {
+    let confirmation = window.confirm('This Will Move Selected Medias.\n\rAre You Sure?')
+    if (confirmation) {
+      console.log(day)
+    }
+  }
+  // delete selected medias btn
+  const handleDeleteSelectedMedias = day => {
+    let confirmation = window.confirm('This Will Delete Selected Medias.\n\rAre You Sure?')
+    if (confirmation) {
+      console.log(day)
+    }
+  }
+
   return (
     <Segment.Group raised className='top-segment'>
 
-      <Header attached='top' textAlign='center'>Home</Header>
+      <Header attached='top' textAlign='center' className='headings'>Home</Header>
 
       {/* Log */}
-      <Segment>Log</Segment>
+      <Segment className='headings'>Log</Segment>
       <Segment style={{
         maxHeight: '10rem',
         overflowY: 'auto'
@@ -68,16 +148,74 @@ const Home = () => {
       </Segment>
 
       {/* Medias */}
-      <Segment>
+      <Segment className='headings'>
         Video Recordings
       </Segment>
       <Segment attached='bottom'>
-        {!mediasLoaded ?
+        {!mediasLoaded || !dates ?
           <Fragment>
             Loading ...
           </Fragment>
           :
-          medias && medias.map((media, i) => <video key={i} src={media.url} width='100%' controls></video>)
+          <Fragment>
+            {dates && dates.map((dateHeadline, i) => (
+              <Fragment key={i}>
+                <Responsive as={Menu}>
+                  <Menu.Item as='h4' style={{marginBottom: 0}}><strong>{dateHeadline}</strong></Menu.Item>
+                  <Menu.Item position='right'>
+                    <Dropdown text='actions' pointing='right'>
+                      <Dropdown.Menu>
+                        <Dropdown.Item onClick={() => handleSelectAllMediasByDay(dateHeadline)}>
+                          Select All
+                        </Dropdown.Item>
+                        <Dropdown.Item onClick={() => handleUnselectAllMediasByDay(dateHeadline)}>
+                          Unselect All
+                        </Dropdown.Item>
+                        <Dropdown.Item onClick={() => handleMoveSelectedMedias(dateHeadline)}>
+                          Move Selected
+                        </Dropdown.Item>
+                        <Dropdown.Item onClick={() => handleDeleteSelectedMedias(dateHeadline)}>
+                          Delete Selected
+                        </Dropdown.Item>
+                      </Dropdown.Menu>
+                    </Dropdown>
+                  </Menu.Item>
+                </Responsive>
+                <Card.Group>
+                {medias && medias[dateHeadline].map((med, j) => (
+                  <Card key={j}>
+                    <Label
+                      as='a'
+                      color={med.selected ? 'red' : 'teal'}
+                      corner='right'
+                      onClick={() => handleClickSelectOne(med.day, med.name)}
+                    >
+                      <Icon
+                        name={med.selected ? 'check circle' : 'circle'}
+                        style={{cursor: 'pointer'}}
+                        onClick={e => {
+                          e.stopPropagation()
+                          handleClickSelectOne(med.day, med.name)
+                        }}
+                      />
+                    </Label>
+                    <Card.Content className='no-bottom-paddings'>
+                      <Card.Header>{med.name.split('-')[0]}</Card.Header>
+                      <p>{med.day}<br/>{med.hour}</p>
+                    </Card.Content>
+                    <Card.Content extra>
+                      <video key={i} src={med.url} width='100%' controls></video>
+                    </Card.Content>
+                    <Card.Content extra className='no-top-paddings'>
+                      <Card.Meta>Size: {filesize(med.size)}</Card.Meta>
+                      <Button floated='right'>Play</Button>
+                    </Card.Content>
+                  </Card>
+                ))}
+                </Card.Group>
+              </Fragment>
+            ))}
+          </Fragment>
         }
       </Segment>
 

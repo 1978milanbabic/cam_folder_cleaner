@@ -8,6 +8,7 @@ const socketServer = serverToBind => {
   console.log('Socket Server initialized')
   wsServer.on('connection', clientSocket => {
     console.log('Socket Server connected')
+
     clientSocket.on('refresh', () => {
       wsServer.emit('refresh', 'refresh')
     })

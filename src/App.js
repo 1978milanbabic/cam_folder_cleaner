@@ -38,7 +38,7 @@ class App extends Component {
               Configuration
             </Menu.Item>
             <Menu.Item  position='right'>
-              <Button onClick={this.doReboot}>Reboot</Button>
+              <Button onClick={this.doReboot} color='red'>Reboot</Button>
             </Menu.Item>
           </Responsive>
           <Container>
