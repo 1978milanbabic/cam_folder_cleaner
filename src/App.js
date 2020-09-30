@@ -10,10 +10,11 @@ import {
 // scenes
 import Home from './scenes/Home'
 import Config from './scenes/Config'
+import Camera from './scenes/Camera'
 
 // styles
 import 'semantic-ui-css/semantic.min.css'
-import './App.css'
+import './App.scss'
 
 class App extends Component {
   doReboot = () =>  {
@@ -34,6 +35,9 @@ class App extends Component {
             <Menu.Item as={NavLink} to='/' exact>
               Home
             </Menu.Item>
+            <Menu.Item as={NavLink} to='/camera' exact>
+              Live
+            </Menu.Item>
             <Menu.Item as={NavLink} to='/config' exact>
               Configuration
             </Menu.Item>
@@ -44,6 +48,7 @@ class App extends Component {
           <Container>
             <Switch>
               <Route path='/' exact component={Home}></Route>
+              <Route path='/camera' component={Camera}></Route>
               <Route path='/config' component={Config}></Route>
             </Switch>
           </Container>

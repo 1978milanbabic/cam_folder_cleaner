@@ -7,15 +7,15 @@ import {
   Button, Segment, Header
 } from 'semantic-ui-react'
 
+// styles
+import styles from './Config.module.scss'
 
 class Config extends Component {
 
   render () {
     return (
       <Segment.Group raised className='top-segment'>
-        <Header attached='top'>
-          Configurations
-        </Header>
+        <Header attached='top' textAlign='center' className='headings'>Configuration</Header>
         <Segment attached='bottom'>
           abcd
         </Segment>

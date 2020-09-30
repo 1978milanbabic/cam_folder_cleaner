@@ -1,0 +1,21 @@
+.App {
+  background-color: #f7f7f7;
+  min-height: 100vh;
+  padding-top: 44px;
+
+  .top-segment {
+    margin: 1rem 0!important;
+  }
+
+  .headings {
+    background-color: #f5f5f5!important;
+  }
+
+  .no-bottom-paddings {
+    padding-bottom: 0!important;
+  }
+
+  .no-top-paddings {
+    padding-top: 0!important;
+  }
+}

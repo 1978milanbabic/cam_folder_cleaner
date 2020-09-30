@@ -21,7 +21,7 @@ import {
 } from 'semantic-ui-react'
 
 // import styles
-import './style.css'
+import styles from './Home.module.scss'
 
 const Home = () => {
   // medias loaded?
