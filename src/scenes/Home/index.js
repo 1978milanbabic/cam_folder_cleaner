@@ -133,7 +133,12 @@ const Home = () => {
             .then(res => res.json())
             .then(response => {
               console.log(response)
-              if (response && response.deleted) window.location.reload(false)
+              if (response && response.deleted) {
+                const { deleted } = response.deleted
+                let reducedMedias = _.cloneDeep(medias)
+                reducedMedias.filter(med => med.name !== deleted)
+                setMedias(reducedMedias)
+              }
             })
         }
       })
