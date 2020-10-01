@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import { Route, BrowserRouter as Router, Switch, NavLink } from 'react-router-dom'
 import {
   Menu,
@@ -17,6 +17,9 @@ import 'semantic-ui-css/semantic.min.css'
 import './App.scss'
 
 const App = () => {
+  // stream link
+  const [streamUrl, setStreamUrl] = useState()
+
   const doReboot = () =>  {
     let ruSure = window.confirm('This will reboot system!')
     if (ruSure) {
@@ -27,6 +30,13 @@ const App = () => {
       })
     }
   }
+  useEffect(() => {
+    fetch('/api/motion/streaming_url', {credentials: 'same-origin'})
+      .then(res => res.json())
+      .then(response => {
+        setStreamUrl(response.streaming)
+      })
+  }, [])
   return (
     <div className='App'>
       <Router>
@@ -34,7 +44,7 @@ const App = () => {
           <Menu.Item as={NavLink} to='/' exact>
             Home
           </Menu.Item>
-          <Menu.Item as='a' href='http://10.144.245.0:8081'>
+          <Menu.Item as='a' href={streamUrl}>
             Live
           </Menu.Item>
           <Menu.Item as={NavLink} to='/config' exact>

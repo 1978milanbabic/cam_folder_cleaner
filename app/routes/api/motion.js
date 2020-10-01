@@ -9,6 +9,8 @@ const klaw = require('klaw')
 const { response } = require('express')
 const { exec } = require('child_process')
 
+// console.log('ENV var XXX motion stream url: ', process.env.MOTION_STREAM_URL)
+
 // initialize router
 const router = express.Router()
 
@@ -70,6 +72,13 @@ router.delete('/medias/:id', (req, res, err) => {
       deleted: 'false'
     })
   }
+})
+
+// move medias
+
+// get local streaming url
+router.get('/streaming_url', (req, res) => {
+  res.jsonp({ streaming: process.env.MOTION_STREAM_URL })
 })
 
 exports = module.exports = router

@@ -6,6 +6,9 @@ const morgan = require('morgan')
 const express = require('express')
 const proxy = require('http-proxy-middleware')
 
+// dotenv support
+require('./app/utils/dotenv').load()
+
 // initialize express
 const app = express()
 
