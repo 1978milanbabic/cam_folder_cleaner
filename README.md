@@ -9,3 +9,4 @@ Node server and worker that cleans unwanted short videos from "motion.py" (serve
 4. Add tab 'camera'
 5. Move selected videos
 6. Delete selected videos
+7. MOVE MAILER TO LISTEN EVENT ON NEW VIDEO (IMAGE)

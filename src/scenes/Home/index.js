@@ -54,11 +54,19 @@ const Home = () => {
     fetch('/api/motion/medias', {credentials: 'same-origin'})
       .then(res => res.json())
       .then(meds => {
+        // filter only pics
+        let filteredMedias = []
+        if (Array.isArray(meds) && meds.length > 0) {
+          filteredMedias = meds.filter(m => {
+            let nameArr = m.name.split('.')
+            let extension = nameArr[nameArr.length - 1]
+            return extension === 'jpg'
+          })
+        }
         // obtained medias list
         setMediasLoaded(true)
-        if (Array.isArray(meds) && meds.length > 0) {
-          let loadedMedias = [ ...meds ]
-          loadedMedias.map(m => {
+        if (filteredMedias.length > 0) {
+          filteredMedias.map(m => {
             let date = moment(m.created_at).local()
             m.day = date.format('DD-MMM-YYYY')
             m.hour = date.format('HH:mm:ss')
@@ -66,7 +74,7 @@ const Home = () => {
             return m
           })
           // state medias = { 'date': [ ...mediasOrderedByTime ], ... }
-          let inDates = [ ...new Set(loadedMedias.map(d => d.day)) ]
+          let inDates = [ ...new Set(filteredMedias.map(d => d.day)) ]
           setDates(inDates)
           let mediasOrderedByDate = {}
           // create keys by unique day
@@ -74,9 +82,9 @@ const Home = () => {
             mediasOrderedByDate[dat] = []
           })
           // order loaded by time
-          loadedMedias.sort((a, b) => b.time - a.time)
+          filteredMedias.sort((a, b) => b.time - a.time)
           // create entries by date
-          loadedMedias.forEach(ent => {
+          filteredMedias.forEach(ent => {
             ent.selected = false
             mediasOrderedByDate[ent.day].push(ent)
           })
@@ -144,6 +152,16 @@ const Home = () => {
       })
     }
   }
+  // play video btn
+  const handlePlayVideo = vid => {
+    // fetch(`/api/motion/mailme/${vid}`, {credentials: 'same-origin'})
+    //   .then(res => res.json())
+    //   .then(response => {
+    //     if (response && response.mail) {
+    //       console.log('response from FE: ', response.mail)
+    //     }
+    //   })
+  }
 
   return (
     <Segment.Group raised className='top-segment'>
@@ -166,13 +184,13 @@ const Home = () => {
         Video Recordings
       </Segment>
       <Segment attached='bottom'>
-        {!mediasLoaded || !dates ?
+        {!mediasLoaded || !dates  ?
           <Fragment>
             Loading ...
           </Fragment>
           :
           <Fragment>
-            {dates && dates.map((dateHeadline, i) => (
+            {dates && dates.length <= 0 ? (<Fragment>No Medias</Fragment>) : dates.map((dateHeadline, i) => (
               <Fragment key={i}>
                 <Responsive as={Menu}>
                   <Menu.Item as='h4' style={{marginBottom: 0}}><strong>{dateHeadline}</strong></Menu.Item>
@@ -218,11 +236,11 @@ const Home = () => {
                       <p>{med.day}<br/>{med.hour}</p>
                     </Card.Content>
                     <Card.Content extra>
-                      <video key={i} src={med.url} width='100%' controls></video>
+                      <Image key={i} src={med.url}/>
                     </Card.Content>
                     <Card.Content extra className='no-top-paddings'>
                       <Card.Meta>Size: {filesize(med.size)}</Card.Meta>
-                      <Button floated='right'>Play</Button>
+                      <Button floated='right' onClick={() => handlePlayVideo(med.name)}>Play</Button>
                     </Card.Content>
                   </Card>
                 ))}
