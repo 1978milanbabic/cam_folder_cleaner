@@ -7,7 +7,7 @@ const path = require('path')
 const fs = require('fs')
 const klaw = require('klaw')
 const { response } = require('express')
-const { execSync } = require('child_process')
+const { exec } = require('child_process')
 
 // initialize router
 const router = express.Router()
@@ -60,7 +60,7 @@ router.delete('/medias/:id', (req, res, err) => {
     // delete file
     // exec sudo command
     let cmd = `sudo rm ${filePath}`
-    execSync(cmd, (error, stdout, stderr) => {
+    exec(cmd, (error, stdout, stderr) => {
       if (error) throw error
       console.log('stdout: ' + stdout)
       res.jsonp({'deleted: ': fileForDelete})
