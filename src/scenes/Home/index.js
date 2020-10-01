@@ -144,6 +144,11 @@ const Home = () => {
               if (response && response.deleted) {
                 let reducedMedias = _.cloneDeep(medias)
                 reducedMedias[day] = reducedMedias[day].filter(med => med.name !== response.deleted)
+                // if empty array -> remove property from object
+                if (reducedMedias[day].length === 0) {
+                  setDates(dates.filter(date => date !== day))
+                  delete reducedMedias[day]
+                }
                 console.log(reducedMedias)
                 setMedias(reducedMedias)
               }
