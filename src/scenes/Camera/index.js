@@ -29,7 +29,8 @@ const Camera = () => {
       <Header attached='top' textAlign='center' className='headings'>Live Camera</Header>
 
       <Segment>
-        <video src='http://localhost:8081' controls={false} />
+        {/* <video src='http://10.144.245.0:8081' controls={false}></video> */}
+        <iframe src='http://10.144.245.0:8081' height='500' width='300' title='live cam'></iframe>
       </Segment>
     </Segment.Group>
   )

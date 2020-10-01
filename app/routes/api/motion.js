@@ -6,6 +6,13 @@ const { extensionTypeMap } = require('../../utils/mediaFilesExtensions')
 const path = require('path')
 const fs = require('fs')
 const klaw = require('klaw')
+const { response } = require('express')
+const sudo = require('sudo-prompt')
+
+// sudo name
+const sudoOptions = {
+  name: 'camcleaner'
+}
 
 // initialize router
 const router = express.Router()
@@ -49,5 +56,25 @@ router.get('/medias', async (req, res) => {
   res.jsonp(medias)
 })
 
+// delete medias
+router.delete('/medias/:id', (req, res, err) => {
+  const fileForDelete = req.params.id
+  const filePath = path.join(config.motionmediadir, fileForDelete)
+  // check if file exists
+  if (fs.existsSync(filePath)) {
+    // delete file
+    // exec sudo command
+    let cmd = `rm ${filePath}`
+    sudo.exec(cmd, sudoOptions, (error, stdout, stderr) => {
+      if (error) throw error
+      console.log('stdout: ' + stdout)
+      res.jsonp({'deleted: ': fileForDelete})
+    })
+  } else {
+    res.jsonp({
+      deleted: 'false'
+    })
+  }
+})
 
 exports = module.exports = router

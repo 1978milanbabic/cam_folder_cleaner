@@ -66,13 +66,11 @@ const Home = () => {
             return m
           })
           // state medias = { 'date': [ ...mediasOrderedByTime ], ... }
-          let dates = [ ...new Set(loadedMedias.map(d => d.day)) ]
-          let reverseDates = dates.reverse()
-          setDates(reverseDates)
-
+          let inDates = [ ...new Set(loadedMedias.map(d => d.day)) ]
+          setDates(inDates)
           let mediasOrderedByDate = {}
           // create keys by unique day
-          reverseDates.forEach(dat => {
+          inDates.forEach(dat => {
             mediasOrderedByDate[dat] = []
           })
           // order loaded by time
@@ -120,14 +118,25 @@ const Home = () => {
   const handleMoveSelectedMedias = day => {
     let confirmation = window.confirm('This Will Move Selected Medias.\n\rAre You Sure?')
     if (confirmation) {
-      console.log(day)
+      // move selected medias
+
     }
   }
   // delete selected medias btn
   const handleDeleteSelectedMedias = day => {
     let confirmation = window.confirm('This Will Delete Selected Medias.\n\rAre You Sure?')
     if (confirmation) {
-      console.log(day)
+      // delete selected medias
+      medias[day].forEach(med => {
+        if (med.selected) {
+          fetch(`/api/motion/medias/${med.name}`, {credentials: 'same-origin', method: 'delete'})
+            .then(res => res.json())
+            .then(response => {
+              console.log(response)
+              if (response && response.deleted) window.location.reload(false)
+            })
+        }
+      })
     }
   }
 
