@@ -63,7 +63,7 @@ router.delete('/medias/:id', (req, res, err) => {
     exec(cmd, (error, stdout, stderr) => {
       if (error) throw error
       console.log('stdout: ' + stdout)
-      res.jsonp({'deleted: ': fileForDelete})
+      res.jsonp({deleted: fileForDelete})
     })
   } else {
     res.jsonp({
