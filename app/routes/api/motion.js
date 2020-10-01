@@ -64,29 +64,30 @@ router.delete('/medias/:id', (req, res, err) => {
   // console.log('FILE NAMES: ', picForDelete, videoForDelete)
 
   const filePathPic = path.join(config.motionmediadir, picForDelete)
-  const filePathVideo = path.join(config.motionlogdir, videoForDelete)
+  const filePathVideo = path.join(config.motionmediadir, videoForDelete)
   // check if file exists
-  if (fs.existsSync(filePathPic) && fs.existsSync(filePathVideo)) {
-    // **** exec sudo commands ****
+  // **** exec sudo commands ****
+  if (fs.existsSync(filePathPic)) {
     // delete image
-    let cmdPic = `sudo rm ${filePathPic}`
-    exec(cmdPic, (error, stdout, stderr) => {
+    let cmd = `sudo rm ${filePathPic}`
+    exec(cmd, (error, stdout, stderr) => {
       if (error) throw error
       if (stderr) console.log('stderr: ', stderr)
       console.log('stdout: ' + stdout)
       res.jsonp({deleted: picForDelete})
     })
+  } else {
+    res.jsonp({
+      deleted: 'false'
+    })
+  }
+  if (fs.existsSync(filePathVideo)) {
     // delete video
     let cmdVid = `sudo rm ${filePathVideo}`
     exec(cmdVid, (error, stdout, stderr) => {
       if (error) throw error
       if (stderr) console.log('stderr: ', stderr)
       console.log('stdout: ' + stdout)
-      res.jsonp({deleted: videoForDelete})
-    })
-  } else {
-    res.jsonp({
-      deleted: 'false'
     })
   }
 })
