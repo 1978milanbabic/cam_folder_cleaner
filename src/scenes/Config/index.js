@@ -1,14 +1,12 @@
 import React, { Component } from 'react'
-import { Route, BrowserRouter as Router, Switch, NavLink } from 'react-router-dom'
+// import { Route, BrowserRouter as Router, Switch, NavLink } from 'react-router-dom'
 import {
-  Menu,
-  Responsive,
-  Container,
-  Button, Segment, Header
+  Segment,
+  Header
 } from 'semantic-ui-react'
 
 // styles
-import styles from './Config.module.scss'
+// import styles from './Config.module.scss'
 
 class Config extends Component {
 

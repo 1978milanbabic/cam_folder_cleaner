@@ -17,7 +17,7 @@ router.use((req, res, next) => {
 // media send file
 router.get('/medias/:id', (req, res) => {
   const reqFile = req.params.id
-  const filePath = path.join(config.motionmediadir, reqFile)
+  const filePath = path.join(config.mediadir, reqFile)
   // check if file exists
   if (fs.existsSync(filePath)) {
     res.sendFile(filePath)

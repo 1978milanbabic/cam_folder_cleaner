@@ -2,7 +2,7 @@
 const express = require('express')
 const config = require('../../components/config')
 const multer = require('multer')
-const { extensionTypeMap } = require('../../utils/mediaFilesExtensions')
+const { isMedia, mediaType } = require('../../utils/mediaFilesExtensions')
 const path = require('path')
 const fs = require('fs')
 const klaw = require('klaw')
@@ -11,6 +11,9 @@ const { exec } = require('child_process')
 const nodemailer = require('nodemailer')
 
 // console.log('ENV var XXX motion stream url: ', process.env.SENDER_EMAIL, process.env.SENDER_PASS)
+
+// assure that medias is not already deleted
+let deletedMedias = []
 
 // initialize router
 const router = express.Router()
@@ -36,18 +39,22 @@ router.get('/log', async (req, res) => {
 
 // list medias
 router.get('/medias', async (req, res) => {
+  // empty delete arr
+  deletedMedias = []
   let medias = []
-  for await (const file of klaw(config.motionmediadir)) {
+  for await (const file of klaw(config.mediadir)) {
     if (file.stats.isDirectory()) continue
     let name = path.basename(file.path)
     // not recognized extension
-    if (!extensionTypeMap[path.extname(name)]) continue
+    if (!isMedia(path.extname(name))) continue
+    if (mediaType(path.extname(name)) === 'image') continue
     medias.push({
-      name,
-      type: extensionTypeMap[path.extname(name)],
+      name: name.replace('.mp4', '-01.jpg'),
+      type: mediaType(path.extname(name)),
       size: file.stats.size,
       created_at: file.stats.ctime,
-      url: req.mediaUrl(name)
+      url: req.mediaUrl(name).replace('.mp4', '-01.jpg'),
+      videoUrl: req.mediaUrl(name)
     })
   }
   medias = medias.sort((a, b) => b.created_at - a.created_at)
@@ -61,15 +68,20 @@ router.delete('/medias/:id', async (req, res, err) => {
   const fileCapitals = fileForDeleteArr[0] + '-' + fileForDeleteArr[1]
   const picForDelete = fileCapitals + '-01.jpg'
   const videoForDelete = fileCapitals + '.mp4'
-  // console.log('FILE NAMES: ', picForDelete, videoForDelete)
 
-  const filePathPic = path.join(config.motionmediadir, picForDelete)
-  const filePathVideo = path.join(config.motionmediadir, videoForDelete)
-  // check if file exists
+  const filePathPic = path.join(config.mediadir, picForDelete)
+  const filePathVideo = path.join(config.mediadir, videoForDelete)
+
+  // check if already deleted
+  const deleteIsDone = file => {
+    return deletedMedias.filter(med => med === file).length > 0
+  }
+
   // **** exec sudo commands ****
-
   // delete both image and video
-  if (fs.existsSync(filePathPic) && fs.existsSync(filePathVideo)) {
+  if (fs.existsSync(filePathPic) && fs.existsSync(filePathVideo) && !deleteIsDone(picForDelete) && !deleteIsDone(videoForDelete)) {
+    deletedMedias.push(picForDelete)
+    deletedMedias.push(videoForDelete)
     let cmd = `sudo rm ${filePathPic} ${filePathVideo}`
     exec(cmd, (error, stdout, stderr) => {
       if (error) throw error

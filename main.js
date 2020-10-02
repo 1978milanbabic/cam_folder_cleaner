@@ -1,7 +1,7 @@
 // dependencies
 const server = require('./server')
 const socketServer = require('./ws')
-const { addFilesWatcherOnAddFile, addMediaFilesWatcher } = require('./app/utils/filesWatcher')
+const { addNewMotionFilesWatcher, addFilesWatcherOnAddFile, addMediaFilesWatcher } = require('./app/utils/filesWatcher')
 
 // init server
 const port = process.env.HTTP_PORT || 1337
@@ -12,5 +12,6 @@ server.listen(port, () => {
 socketServer(server)
 
 // init file watchers
+addNewMotionFilesWatcher()
 addFilesWatcherOnAddFile()
 addMediaFilesWatcher()

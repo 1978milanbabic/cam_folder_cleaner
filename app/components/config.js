@@ -4,11 +4,11 @@ const path = require('path')
 const mkdirp = require('mkdirp')
 
 // set data directories
-let DATADIR = path.join(os.homedir(), '.local', 'share', 'razvojne-apps', 'cam-folder-cleaner')
+let DATADIR = path.join(os.homedir(), '.local', 'share', 'orahsoft', 'cam-folder-cleaner')
 let motionmediadir = '/var/lib/motion/'
 let motionlogdir = '/var/log/motion/'
 if (process.platform === 'win32') {
-  DATADIR = path.join(os.homedir(), 'AppData', 'Roaming', 'Razvojne-Apps', 'Cam-Folder-Cleaner')
+  DATADIR = path.join(os.homedir(), 'AppData', 'Roaming', 'Orahsoft', 'Cam-Folder-Cleaner')
 }
 
 if (process.env.NODE_ENV === 'test') DATADIR = path.join(os.tmpdir(), 'test-camcleaner')

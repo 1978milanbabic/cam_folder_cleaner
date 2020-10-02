@@ -1,11 +1,14 @@
 // module dependecies
 const fs = require('fs')
 const path = require('path')
-const { isMedia } = require('./mediaFilesExtensions')
+const moment = require('moment')
+const { isMedia, mediaType } = require('./mediaFilesExtensions')
 const mediaDir = require('../components/config')
 
-const formatName = name => {
-  return name.replace(/[^0-9a-z]/gi, '').toLowerCase()
+const formatName = (name, ext) => {
+  let newName = name.split('-')[0] + '-' + moment().format('DD_MM_YYYY')
+  if (mediaType(ext) === 'image') newName = newName + '-01'
+  return newName
 }
 
 const fileNameExists = fname => {
@@ -20,7 +23,7 @@ const fileNameExists = fname => {
 
 const fileNameChecker = filename => {
   if (fileNameExists(filename)){
-    return fileNameChecker(filename + '1')
+    return fileNameChecker('1' + filename)
   } else {
     return filename
   }
@@ -31,7 +34,7 @@ const fileNameChanger = event => {
   const fileExt = path.parse(event).ext
   if (isMedia(fileExt)) {
     // try trim non AN if not already exist
-    const nonANName = formatName(fileName)
+    const nonANName = formatName(fileName, fileExt)
     let finalName = fileNameChecker(nonANName)
     // rename file
     fs.rename(

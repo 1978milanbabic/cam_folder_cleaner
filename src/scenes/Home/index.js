@@ -8,8 +8,6 @@ import filesize from 'filesize'
 import {
   Segment,
   Header,
-  Dimmer,
-  Loader,
   Image,
   Card,
   Button,
@@ -21,7 +19,7 @@ import {
 } from 'semantic-ui-react'
 
 // import styles
-import styles from './Home.module.scss'
+// import styles from './Home.module.scss'
 
 const Home = () => {
   // medias loaded?
@@ -135,6 +133,7 @@ const Home = () => {
     let confirmation = window.confirm('This Will Delete Selected Medias.\n\rAre You Sure?')
     if (confirmation) {
       // delete selected medias
+      let reducedMedias
       medias[day].forEach(med => {
         if (med.selected) {
           fetch(`/api/motion/medias/${med.name}`, {credentials: 'same-origin', method: 'delete'})
@@ -142,19 +141,18 @@ const Home = () => {
             .then(response => {
               console.log(response)
               if (response && response.deleted) {
-                let reducedMedias = _.cloneDeep(medias)
+                reducedMedias = _.cloneDeep(medias)
                 reducedMedias[day] = reducedMedias[day].filter(med => med.name !== response.deleted)
-                // if empty array -> remove property from object
-                if (reducedMedias[day].length === 0) {
-                  setDates(dates.filter(date => date !== day))
-                  delete reducedMedias[day]
-                }
-                console.log(reducedMedias)
-                setMedias(reducedMedias)
               }
             })
         }
       })
+      setMedias(reducedMedias)
+      // if empty array -> remove property from object
+      if (reducedMedias[day].length === 0) {
+        setDates(dates.filter(date => date !== day))
+        delete reducedMedias[day]
+      }
     }
   }
   // play video btn

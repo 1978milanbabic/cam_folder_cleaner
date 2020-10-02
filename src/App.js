@@ -10,7 +10,7 @@ import {
 // scenes
 import Home from './scenes/Home'
 import Config from './scenes/Config'
-import Camera from './scenes/Camera'
+// import Camera from './scenes/Camera'
 
 // styles
 import 'semantic-ui-css/semantic.min.css'
