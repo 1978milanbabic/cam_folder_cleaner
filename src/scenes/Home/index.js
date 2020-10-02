@@ -1,7 +1,7 @@
 import React, { Fragment, useEffect, useState } from 'react'
 import moment from 'moment'
 import _ from 'lodash'
-// import io from 'socket.io-client'
+import io from 'socket.io-client'
 import filesize from 'filesize'
 
 // semantic
@@ -33,9 +33,8 @@ const Home = () => {
   // dates
   const [dates, setDates] = useState([])
 
-  // load log & medias list
-  useEffect(() => {
-    // load logs
+  //load log
+  const loadLogFile = () => {
     fetch('/api/motion/log', {credentials: 'same-origin'})
       .then(res => res.json())
       .then(logs => {
@@ -48,7 +47,9 @@ const Home = () => {
           console.log('No logs ...')
         }
       })
-    // load medias (create list of medias)
+  }
+  // load medias
+  const loadMedias = () => {
     fetch('/api/motion/medias', {credentials: 'same-origin'})
       .then(res => res.json())
       .then(meds => {
@@ -94,6 +95,20 @@ const Home = () => {
           console.log('No Medias')
         }
       })
+  }
+
+  // load log & medias list on load
+  useEffect(() => {
+    // load logs
+    loadLogFile()
+    // load medias (create list of medias)
+    loadMedias()
+    // socket
+    // connect to socket.io
+    const socket = io('/')
+    socket.on('refresh', val =>{
+      if (val === 'medias') loadMedias()
+    })
   }, [])
 
   // corner individual media select btn
@@ -149,9 +164,9 @@ const Home = () => {
       })
       setMedias(reducedMedias)
       // if empty array -> remove property from object
-      if (reducedMedias[day].length === 0) {
+      if (!reducedMedias || !reducedMedias[day] || reducedMedias[day].length === 0) {
         setDates(dates.filter(date => date !== day))
-        delete reducedMedias[day]
+        if (reducedMedias && reducedMedias[day]) delete reducedMedias[day]
       }
     }
   }

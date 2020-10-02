@@ -3,8 +3,34 @@ const config = require('../components/config')
 const chokidar = require('chokidar')
 const { fileNameChanger } = require('./fileNameConventions')
 const EventEmitter = require('events')
-const { isMedia, mediaType } = require('./mediaFilesExtensions')
+const { mediaType } = require('./mediaFilesExtensions')
 const { exec } = require('child_process')
+const nodemailer = require('nodemailer')
+
+// mail
+const transporter = nodemailer.createTransport({
+  host: 'smtp.gmail.com',
+  port: 587,
+  auth: {
+      user: process.env.SENDER_EMAIL,
+      pass: process.env.SENDER_PASS
+  }
+})
+const sendMessage = params => {
+  const message = {
+    from: process.env.SENDER_EMAIL, // Sender address
+    to: process.env.RECIPIENT,         // List of recipients
+    subject: 'This is test message', // Subject line
+    text: `This is where you are going to be alerted on new videos! ${params}` // Plain text body
+  }
+  transporter.sendMail(message, (err, info) => {
+    if (err) {
+      console.log(err)
+    } else {
+      console.log(info)
+    }
+  })
+}
 
 // file emitter
 class FileEmitter extends EventEmitter {}
@@ -27,10 +53,21 @@ let mediaFolderWatcher
 const addMediaFilesWatcher = () => {
   mediaFolderWatcher = chokidar.watch(config.mediadir)
   mediaFolderWatcher.on('all', (event, path) => {
-    if (event === 'change') return
+    // file name & file ext
+    let fileName = path.split('/')
+    fileName = fileName[fileName.length - 1].toString()
+    let ext = fileName.split('.')
+    ext = ('.' + ext[ext.length -1])
+
+    if (event === 'change' || mediaType(ext) === 'image') return
     clearTimeout(refreshTimeout)
     refreshTimeout = setTimeout(() => {
-      fileEmitter.emit('refresh', 'medias')
+      if (event !== 'addDir'){
+        // refresh medias on FE
+        fileEmitter.emit('refresh', 'medias')
+        // send email on new video
+        sendMessage(fileName)
+      }
     }, 400)
   })
 }
@@ -63,7 +100,7 @@ const addNewMotionFilesWatcher = () => {
             if (stderr) console.log('stderr: ', stderr)
             console.log('stdout: ' + stdout)
           })
-        }, 20 * 1000)
+        }, 10 * 1000)
       }
     }
     // ignore deletions

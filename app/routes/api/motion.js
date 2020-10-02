@@ -8,7 +8,6 @@ const fs = require('fs')
 const klaw = require('klaw')
 const { response } = require('express')
 const { exec } = require('child_process')
-const nodemailer = require('nodemailer')
 
 // console.log('ENV var XXX motion stream url: ', process.env.SENDER_EMAIL, process.env.SENDER_PASS)
 
