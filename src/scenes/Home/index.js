@@ -33,6 +33,10 @@ const Home = () => {
   const [log, setLog] = useState([])
   // dates
   const [dates, setDates] = useState([])
+  // modal
+  const [modalOpen, setModalOpen] = useState(false)
+  // modal video url
+  const [videoUrl, setVideoUrl] = useState('')
 
   //load log
   const loadLogFile = () => {
@@ -185,8 +189,8 @@ const Home = () => {
     // reload medias
     loadMedias()
     // open modal
-
-
+    setVideoUrl(vid)
+    setModalOpen(true)
   }
   // handle close video modal
 
@@ -196,8 +200,23 @@ const Home = () => {
 
       <Modal
         size='fullscreen'
+        open={modalOpen}
+        // onClose={() => setModalOpen(false)}
       >
+        <Modal.Content>
+          <video
+            src={videoUrl}
+            controls
+            style={{
 
+            }}
+          />
+        </Modal.Content>
+        <Modal.Actions>
+          <Button color='green' inverted onClick={() => setModalOpen(false)}>
+            <Icon name='checkmark' /> Close
+          </Button>
+        </Modal.Actions>
       </Modal>
 
       <Segment.Group raised className='top-segment'>

@@ -19,3 +19,25 @@
     padding-top: 0!important;
   }
 }
+
+.ui.dimmer.page {
+  padding: 0!important;
+}
+
+.ui.page.modals .ui.fullscreen.modal {
+  width: 98%!important;
+  left: 1%!important;
+  right: 1%!important;
+  top: 1%!important;
+  bottom: 1%!important;
+  margin: 0!important;
+  max-height: 98%!important;
+
+  .content {
+    padding: 0!important;
+
+    video {
+      width: 100%;
+    }
+  }
+}
