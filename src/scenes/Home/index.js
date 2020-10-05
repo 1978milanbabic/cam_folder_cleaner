@@ -108,6 +108,7 @@ const Home = () => {
     const socket = io('/')
     socket.on('refresh', val =>{
       if (val === 'medias') loadMedias()
+      if (val === 'logs') loadLogFile()
     })
   }, [])
 

@@ -6,6 +6,8 @@ const EventEmitter = require('events')
 const { mediaType } = require('./mediaFilesExtensions')
 const { exec } = require('child_process')
 const nodemailer = require('nodemailer')
+const fs = require('fs')
+const moment = require('moment')
 
 // mail
 const transporter = nodemailer.createTransport({
@@ -21,13 +23,13 @@ const sendMessage = params => {
     from: process.env.SENDER_EMAIL, // Sender address
     to: process.env.RECIPIENT,         // List of recipients
     subject: 'This is test message', // Subject line
-    text: `This is where you are going to be alerted on new videos! ${params}` // Plain text body
+    text: `${params} - Alert message on new detection! ` // Plain text body
   }
   transporter.sendMail(message, (err, info) => {
     if (err) {
-      console.log(err)
+      console.log('mail error: ', err)
     } else {
-      console.log(info)
+      console.log('mail status: ', info && info.response)
     }
   })
 }
@@ -65,73 +67,60 @@ const addMediaFilesWatcher = () => {
       if (event !== 'addDir'){
         // refresh medias on FE
         fileEmitter.emit('refresh', 'medias')
-        // send email on new video
-        sendMessage(fileName)
       }
     }, 400)
   })
 }
 
-// watch motion media folder
-let newMotionFilesWatcher
-// check if changes of video file stoped
-let videoBuildTimeout
-let fileMoved = false
-// watcher
-const addNewMotionFilesWatcher = () => {
-  newMotionFilesWatcher = chokidar.watch(config.motionmediadir)
-  newMotionFilesWatcher.on('all', (event, path) => {
-    console.log(event)
-    // file name & file ext
-    let fileName = path.split('/')
-    fileName = fileName[fileName.length - 1].toString()
-    let ext = fileName.split('.')
-    ext = ('.' + ext[ext.length -1])
-    // build timeout -> in order to wait for changes
-    let setBuildTimeout = () => {
-      clearTimeout(videoBuildTimeout)
-      if (!fileMoved) {
-        videoBuildTimeout = setTimeout(() => {
-          // move video file
-          fileMoved = true
-          let cmd = `sudo mv ${path} ${config.uploaddir}`
-          exec(cmd, (error, stdout, stderr) => {
-            if (error) throw error
-            if (stderr) console.log('stderr: ', stderr)
-            console.log('stdout: ' + stdout)
-          })
-        }, 10 * 1000)
-      }
-    }
-    // ignore deletions
-    if (event === 'unlink') return
-    // on add file
-    if (event === 'add') {
-      if (mediaType(ext) === 'image') {
-        // standard timeout for meta, then move file
-        setTimeout(() => {
-          // move image
-          let cmd = `sudo mv ${path} ${config.uploaddir}`
-          exec(cmd, (error, stdout, stderr) => {
-            if (error) throw error
-            if (stderr) console.log('stderr: ', stderr)
-            console.log('stdout: ' + stdout)
-          })
-        }, 400)
-      } else if (mediaType(ext) === 'video') {
-        fileMoved = false
-        setBuildTimeout()
-      } else {
-        return
-      }
-    }
-    // on change file -> prolong move video
+// log watcher
+let logWatcher
+const addLogWatcher = () => {
+  logWatcher = chokidar.watch(config.motionlogdir)
+  logWatcher.on('all', (event, path) => {
+    // ignore deletions and adding new file
+    if (event === 'unlink' || event === 'add') return
+    // watch on change log
     if (event === 'change') {
-      if (!fileMoved) {
-        setTimeout(() => {
-          setBuildTimeout()
-        }, 400);
-      }
+      // read file
+      fs.readFile(path, {encoding:'utf8', flag:'r'}, (err, data) => {
+        if (err) {
+          console.log(err)
+          return
+        }
+        if (data) {
+          // refresh medias on FE
+          fileEmitter.emit('refresh', 'logs')
+          // read log file
+          let lastLog = (data.split('\n').filter(row => row !== '').reverse())[0]
+          lastLog.toString()
+          // check if in last log event starts
+          let eventStarted = lastLog.indexOf('starting event')
+          if (eventStarted > -1) {
+            // starting new event
+            // send mail
+            // send email on new video
+            sendMessage(moment().format('MMMM Do YYYY, h:mm:ss a') + ' --> ')
+          }
+          // check if in last log event ends
+          let eventEnded = lastLog.indexOf('End of event')
+          if (eventEnded > -1) {
+            // event ended
+            // move files to upload dir (standard timeout for meta on files)
+            setTimeout(() => {
+              console.log('Moving files to upload dir. -> ', `${config.motionmediadir}*.* ${config.uploaddir}`)
+              let cmd = `sudo mv ${config.motionmediadir}*.* ${config.uploaddir}`
+              exec(cmd, (error, stdout, stderr) => {
+                if (error) throw error
+                if (stderr) console.log('stderr: ', stderr)
+                console.log('stdout: ' + stdout)
+              })
+            }, 400);
+          }
+        } else {
+          console.log('no data')
+        }
+      })
+
     }
   })
 }
@@ -139,10 +128,16 @@ const addNewMotionFilesWatcher = () => {
 const killWatchers = () => {
   uploadWatcher.close()
   mediaFolderWatcher.close()
-  newMotionFilesWatcher.close()
+  logWatcher.close()
 }
 
-console.log(`\n\r*** New Motion Events Watching on folder: *** \n\r${config.motionmediadir}\n\r`)
+console.log(`\n\r*** New Motion Events Watching on log file: *** \n\r${config.motionlogdir}`)
 console.log(`\n\r*** Upload Watching on folder: *** \n\r${config.uploaddir}\n\r`)
 
-exports = module.exports = { addFilesWatcherOnAddFile, addMediaFilesWatcher, addNewMotionFilesWatcher, killWatchers, fileEmitter }
+exports = module.exports = {
+  addFilesWatcherOnAddFile,
+  addMediaFilesWatcher,
+  addLogWatcher,
+  killWatchers,
+  fileEmitter
+}

@@ -103,29 +103,29 @@ router.get('/streaming_url', (req, res) => {
 })
 
 // mail to alert on new videos  ************* PREBACI~!!!!!! ***********
-router.get('/mailme/:vid', (req, res) => {
-  // res.jsonp({ mail: req.params.vid })
-  const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    auth: {
-        user: process.env.SENDER_EMAIL,
-        pass: process.env.SENDER_PASS
-    }
-  })
-  const message = {
-    from: process.env.SENDER_EMAIL, // Sender address
-    to: '1978milan.babic@gmail.com',         // List of recipients
-    subject: 'This is test message', // Subject line
-    text: `This is where you are going to be alerted on new videos! ${req.params.vid}` // Plain text body
-  }
-  transporter.sendMail(message, (err, info) => {
-    if (err) {
-      res.jsonp({mail: err})
-    } else {
-      res.jsonp({mail: info})
-    }
-  })
-})
+// router.get('/mailme/:vid', (req, res) => {
+//   // res.jsonp({ mail: req.params.vid })
+//   const transporter = nodemailer.createTransport({
+//     host: 'smtp.gmail.com',
+//     port: 587,
+//     auth: {
+//         user: process.env.SENDER_EMAIL,
+//         pass: process.env.SENDER_PASS
+//     }
+//   })
+//   const message = {
+//     from: process.env.SENDER_EMAIL, // Sender address
+//     to: '1978milan.babic@gmail.com',         // List of recipients
+//     subject: 'This is test message', // Subject line
+//     text: `This is where you are going to be alerted on new videos! ${req.params.vid}` // Plain text body
+//   }
+//   transporter.sendMail(message, (err, info) => {
+//     if (err) {
+//       res.jsonp({mail: err})
+//     } else {
+//       res.jsonp({mail: info})
+//     }
+//   })
+// })
 
 exports = module.exports = router
