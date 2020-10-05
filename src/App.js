@@ -10,7 +10,6 @@ import {
 // scenes
 import Home from './scenes/Home'
 import Config from './scenes/Config'
-// import Camera from './scenes/Camera'
 
 // styles
 import 'semantic-ui-css/semantic.min.css'
@@ -57,7 +56,6 @@ const App = () => {
         <Container>
           <Switch>
             <Route path='/' exact component={Home}></Route>
-            {/* <Route path='/camera' component={Camera}></Route> */}
             <Route path='/config' component={Config}></Route>
           </Switch>
         </Container>

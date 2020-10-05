@@ -8,11 +8,7 @@ const fs = require('fs')
 const klaw = require('klaw')
 const { response } = require('express')
 const { exec } = require('child_process')
-
-// console.log('ENV var XXX motion stream url: ', process.env.SENDER_EMAIL, process.env.SENDER_PASS)
-
-// assure that medias is not already deleted
-let deletedMedias = []
+const db = require('../../components/db')
 
 // initialize router
 const router = express.Router()
@@ -38,22 +34,28 @@ router.get('/log', async (req, res) => {
 
 // list medias
 router.get('/medias', async (req, res) => {
-  // empty delete arr
-  deletedMedias = []
   let medias = []
+  // get list of seen videos
+  let seen = await db.get('seen_video').value()
+  // list files
   for await (const file of klaw(config.mediadir)) {
     if (file.stats.isDirectory()) continue
     let name = path.basename(file.path)
     // not recognized extension
     if (!isMedia(path.extname(name))) continue
     if (mediaType(path.extname(name)) === 'image') continue
+    // search if seen
+    let thisSeen
+    seen.filter(s => s === name).length > 0 ? thisSeen = true : thisSeen = false
+    // create response object
     medias.push({
       name: name.replace('.mp4', '-01.jpg'),
       type: mediaType(path.extname(name)),
       size: file.stats.size,
       created_at: file.stats.ctime,
       url: req.mediaUrl(name).replace('.mp4', '-01.jpg'),
-      videoUrl: req.mediaUrl(name)
+      videoUrl: req.mediaUrl(name),
+      seen: thisSeen
     })
   }
   medias = medias.sort((a, b) => b.created_at - a.created_at)
@@ -70,17 +72,15 @@ router.delete('/medias/:id', async (req, res, err) => {
 
   const filePathPic = path.join(config.mediadir, picForDelete)
   const filePathVideo = path.join(config.mediadir, videoForDelete)
+  // delete from seen db
+  let seen = db.get('seen_video')
+  let seenArr = seen.value().filter(s => s !== videoForDelete)
 
-  // check if already deleted
-  const deleteIsDone = file => {
-    return deletedMedias.filter(med => med === file).length > 0
-  }
+  db.set('seen_video', seenArr).write()
 
   // **** exec sudo commands ****
   // delete both image and video
-  if (fs.existsSync(filePathPic) && fs.existsSync(filePathVideo) && !deleteIsDone(picForDelete) && !deleteIsDone(videoForDelete)) {
-    deletedMedias.push(picForDelete)
-    deletedMedias.push(videoForDelete)
+  if (fs.existsSync(filePathPic) && fs.existsSync(filePathVideo)) {
     let cmd = `sudo rm ${filePathPic} ${filePathVideo}`
     exec(cmd, (error, stdout, stderr) => {
       if (error) throw error
@@ -95,37 +95,26 @@ router.delete('/medias/:id', async (req, res, err) => {
   }
 })
 
-// move medias
+// push new seen video to seen list
+router.get('/seen/:name', async (req, res) => {
+  const seenToAdd = req.params.name
+  // add to DB
+  let seen = await db.get('seen_video')
+  // if not already on seen list
+  if (seen.value().filter(s => s === seenToAdd).length <= 0) seen.push(seenToAdd).write()
+
+  res.jsonp({seen: 'seen'})
+})
+
+// delete seen list
+router.delete('/seen', (req, res) => {
+  db.set('seen_video', []).write()
+  res.jsonp({seen: 'deleted all'})
+})
 
 // get local streaming url
 router.get('/streaming_url', (req, res) => {
   res.jsonp({ streaming: process.env.MOTION_STREAM_URL })
 })
-
-// mail to alert on new videos  ************* PREBACI~!!!!!! ***********
-// router.get('/mailme/:vid', (req, res) => {
-//   // res.jsonp({ mail: req.params.vid })
-//   const transporter = nodemailer.createTransport({
-//     host: 'smtp.gmail.com',
-//     port: 587,
-//     auth: {
-//         user: process.env.SENDER_EMAIL,
-//         pass: process.env.SENDER_PASS
-//     }
-//   })
-//   const message = {
-//     from: process.env.SENDER_EMAIL, // Sender address
-//     to: '1978milan.babic@gmail.com',         // List of recipients
-//     subject: 'This is test message', // Subject line
-//     text: `This is where you are going to be alerted on new videos! ${req.params.vid}` // Plain text body
-//   }
-//   transporter.sendMail(message, (err, info) => {
-//     if (err) {
-//       res.jsonp({mail: err})
-//     } else {
-//       res.jsonp({mail: info})
-//     }
-//   })
-// })
 
 exports = module.exports = router

@@ -8,6 +8,7 @@ const { exec } = require('child_process')
 const nodemailer = require('nodemailer')
 const fs = require('fs')
 const moment = require('moment')
+const db = require('../components/db')
 
 // mail
 const transporter = nodemailer.createTransport({
@@ -21,7 +22,7 @@ const transporter = nodemailer.createTransport({
 const sendMessage = params => {
   const message = {
     from: process.env.SENDER_EMAIL, // Sender address
-    to: process.env.RECIPIENT,         // List of recipients
+    to: db.get('alert_email').value(),         // List of recipients
     subject: 'This is test message', // Subject line
     text: `${params} - Alert message on new detection! ` // Plain text body
   }
@@ -97,9 +98,9 @@ const addLogWatcher = () => {
           let eventStarted = lastLog.indexOf('starting event')
           if (eventStarted > -1) {
             // starting new event
-            // send mail
+            let doSendMail = db.get('mail_on_event').value()
             // send email on new video
-            sendMessage(moment().format('MMMM Do YYYY, h:mm:ss a') + ' --> ')
+            if (doSendMail) sendMessage(moment().format('MMMM Do YYYY, h:mm:ss a') + ' --> ')
           }
           // check if in last log event ends
           let eventEnded = lastLog.indexOf('End of event')
