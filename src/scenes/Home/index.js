@@ -295,6 +295,7 @@ const Home = () => {
                       </Card.Content>
                       <Card.Content extra className='no-top-paddings'>
                         <Card.Meta>Size: {filesize(med.size)}</Card.Meta>
+                        <Card.Meta>{med.duration}</Card.Meta>
                         <Button floated='right' color={med.seen ? 'grey' : 'blue'} onClick={() => handlePlayVideo(med.videoUrl)}>Play</Button>
                       </Card.Content>
                     </Card>
