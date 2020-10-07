@@ -28,9 +28,9 @@ const sendMessage = params => {
   }
   transporter.sendMail(message, (err, info) => {
     if (err) {
-      console.log('mail error: ', err)
+      db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Mail transporter error: ${err}`).write()
     } else {
-      console.log('mail status: ', info && info.response)
+      db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Mail status: ${info && info.response}`).write()
     }
   })
 }
@@ -97,24 +97,42 @@ const addLogWatcher = () => {
           // check if in last log event starts
           let eventStarted = lastLog.indexOf('starting event')
           if (eventStarted > -1) {
+            // log
+            db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Event started!`).write()
             // starting new event
             let doSendMail = db.get('mail_on_event').value()
             // send email on new video
-            if (doSendMail) sendMessage(moment().format('MMMM Do YYYY, h:mm:ss a') + ' --> ')
+            if (doSendMail) {
+              db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Initiating sending mail...`).write()
+              try {
+                sendMessage(moment().format('MMMM Do YYYY, h:mm:ss a') + ' --> ')
+                db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => New mail sent at`).write()
+              } catch (err) {
+                db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Error sending mail: ${err}`).write()
+              }
+            } else {
+              db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Sending mail dissabled by user!`).write()
+            }
           }
           // check if in last log event ends
           let eventEnded = lastLog.indexOf('End of event')
           if (eventEnded > -1) {
+            // log
+            db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Event Ended!`).write()
             // event ended
             // move files to upload dir (standard timeout for meta on files)
             setTimeout(() => {
-              console.log('Moving files to upload dir. -> ', `${config.motionmediadir}*.* ${config.uploaddir}`)
               let cmd = `sudo mv ${config.motionmediadir}*.* ${config.uploaddir}`
-              exec(cmd, (error, stdout, stderr) => {
-                if (error) throw error
-                if (stderr) console.log('stderr: ', stderr)
-                console.log('stdout: ' + stdout)
-              })
+              try {
+                db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Moving files to Upload dir at the end of the event`).write()
+                exec(cmd, (error, stdout, stderr) => {
+                  if (error) db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Error moving files at the end of the event: ${error}`)
+                  if (stderr) db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Error moving files at the end of the event: ${stderr}`)
+                  db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Moving files to Upload dir at the end of the event: ${stdout}`).write()
+                })
+              } catch (err) {
+                db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Error moving files at the end of the event: ${err}`)
+              }
             }, 400);
           }
         } else {

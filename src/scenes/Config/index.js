@@ -1,4 +1,4 @@
-import React, { Component } from 'react'
+import React, { useState } from 'react'
 // import { Route, BrowserRouter as Router, Switch, NavLink } from 'react-router-dom'
 import {
   Segment,
@@ -8,18 +8,16 @@ import {
 // styles
 // import styles from './Config.module.scss'
 
-class Config extends Component {
+const Config = () => {
 
-  render () {
-    return (
-      <Segment.Group raised className='top-segment'>
-        <Header attached='top' textAlign='center' className='headings'>Configuration</Header>
-        <Segment attached='bottom'>
-          abcd
-        </Segment>
-      </Segment.Group>
-    )
-  }
+  return (
+    <Segment.Group raised className='top-segment'>
+      <Header attached='top' textAlign='center' className='headings'>Configuration</Header>
+      <Segment attached='bottom'>
+        abcd
+      </Segment>
+    </Segment.Group>
+  )
 }
 
 export default Config

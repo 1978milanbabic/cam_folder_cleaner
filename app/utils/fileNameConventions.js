@@ -4,6 +4,7 @@ const path = require('path')
 const moment = require('moment')
 const { isMedia, mediaType } = require('./mediaFilesExtensions')
 const mediaDir = require('../components/config')
+const db = require('../components/db')
 
 const formatName = (name, ext) => {
   let newName = name.split('-')[0] + '-' + moment().format('DD_MM_YYYY')
@@ -37,11 +38,12 @@ const fileNameChanger = event => {
     const nonANName = formatName(fileName, fileExt)
     let finalName = fileNameChecker(nonANName)
     // rename file
+    db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => File renamed and moving to Media dir...`).write()
     fs.rename(
       path.join(mediaDir.uploaddir, fileName + fileExt),
       path.join(mediaDir.mediadir, finalName + fileExt),
       error => {
-        if (error) console.log('Error: ' + error)
+        if (error) db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Error renaming file: ${error}`)
       }
     )
   }
