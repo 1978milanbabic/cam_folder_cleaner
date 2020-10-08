@@ -142,7 +142,7 @@ const addLogWatcher = () => {
                 // waiting for upload to media transport to ocure
                 fileEmitter.emit('refresh', 'app logs')
               }, 850);
-            }, 400)
+            }, 10 * 1000)
           }
         } else {
           console.log('no data')

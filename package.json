@@ -1,6 +1,6 @@
 {
   "name": "cam_folder_cleaner",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Node server and worker that cleans unwanted short videos from 'motion.py' (server with admin page)",
   "main": "main.js",
   "private": true,
