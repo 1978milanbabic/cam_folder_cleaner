@@ -30,7 +30,7 @@ const App = () => {
     }
   }
   useEffect(() => {
-    fetch('/api/motion/streaming_url', {credentials: 'same-origin'})
+    fetch('/api/medias/streaming_url', {credentials: 'same-origin'})
       .then(res => res.json())
       .then(response => {
         setStreamUrl(response.streaming)

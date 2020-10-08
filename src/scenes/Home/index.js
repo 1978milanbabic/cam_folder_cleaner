@@ -27,10 +27,14 @@ const Home = () => {
   const [mediasLoaded, setMediasLoaded] = useState(false)
   // medias info list
   const [medias, setMedias] = useState()
-  // log loaded?
-  const [logLoaded, setLogLoaded] = useState(false)
-  // log as array
-  const [log, setLog] = useState([])
+  // motion log loaded?
+  const [motionLogLoaded, setMotionLogLoaded] = useState(false)
+  // motion log as array
+  const [motionLog, setMotionLog] = useState([])
+  // app log loaded?
+  const [appLogLoaded, setAppLogLoaded] = useState(false)
+  // app log as array
+  const [appLog, setAppLog] = useState([])
   // dates
   const [dates, setDates] = useState([])
   // modal
@@ -38,24 +42,39 @@ const Home = () => {
   // modal video url
   const [videoUrl, setVideoUrl] = useState('')
 
-  //load log
-  const loadLogFile = () => {
+  //load motion log
+  const loadMotionLogFile = () => {
     fetch('/api/motion/log', {credentials: 'same-origin'})
       .then(res => res.json())
       .then(logs => {
         // obtained medias list
-        setLogLoaded(true)
+        setMotionLogLoaded(true)
         if (Array.isArray(logs) && logs.length > 0) {
-          setLog([ ...logs ])
+          setMotionLog([ ...logs ])
         } else {
-          setLog(['No log file to load ...'])
+          setMotionLog(['No log file to load ...'])
+          console.log('No logs ...')
+        }
+      })
+  }
+  //load app log
+  const loadAppLogFile = () => {
+    fetch('/api/medias/log', {credentials: 'same-origin'})
+      .then(res => res.json())
+      .then(logs => {
+        // obtained medias list
+        setAppLogLoaded(true)
+        if (Array.isArray(logs) && logs.length > 0) {
+          setAppLog([ ...logs ])
+        } else {
+          setAppLog(['No log file to load ...'])
           console.log('No logs ...')
         }
       })
   }
   // load medias
   const loadMedias = () => {
-    fetch('/api/motion/medias', {credentials: 'same-origin'})
+    fetch('/api/medias', {credentials: 'same-origin'})
       .then(res => res.json())
       .then(meds => {
         // filter only pics
@@ -104,8 +123,10 @@ const Home = () => {
 
   // load log & medias list on load
   useEffect(() => {
-    // load logs
-    loadLogFile()
+    // load motion logs
+    loadMotionLogFile()
+    // load app logs
+    loadAppLogFile()
     // load medias (create list of medias)
     loadMedias()
     // socket
@@ -113,7 +134,8 @@ const Home = () => {
     const socket = io('/')
     socket.on('refresh', val =>{
       if (val === 'medias') loadMedias()
-      if (val === 'logs') loadLogFile()
+      if (val === 'motion logs') loadMotionLogFile()
+      if (val === 'app logs') loadAppLogFile()
     })
   }, [])
 
@@ -157,7 +179,7 @@ const Home = () => {
       let reducedMedias
       medias[day].forEach(med => {
         if (med.selected) {
-          fetch(`/api/motion/medias/${med.name}`, {credentials: 'same-origin', method: 'delete'})
+          fetch(`/api/medias/${med.name}`, {credentials: 'same-origin', method: 'delete'})
             .then(res => res.json())
             .then(response => {
               console.log(response)
@@ -181,7 +203,7 @@ const Home = () => {
     let vidName = vid.split('/')
     vidName = vidName[vidName.length - 1].toString()
     // set seen on this video
-    fetch(`/api/motion/seen/${vidName}`, {credentials: 'same-origin'})
+    fetch(`/api/medias/seen/${vidName}`, {credentials: 'same-origin'})
       .then(res => res.json())
       .then(response => {
         console.log(response)
@@ -207,6 +229,7 @@ const Home = () => {
           <video
             src={videoUrl}
             controls
+            autoPlay
             style={{
 
             }}
@@ -223,14 +246,25 @@ const Home = () => {
 
         <Header attached='top' textAlign='center' className='headings'>Home</Header>
 
-        {/* Log */}
-        <Segment className='headings'>Log</Segment>
+        {/* Motion Log */}
+        <Segment className='headings'>Motion Log</Segment>
         <Segment style={{
           maxHeight: '10rem',
           overflowY: 'auto'
         }}>
-          {!logLoaded && log ? ('Loading ...') :
-            log.map((lg, i) => (<p key={i}>{lg}</p>))
+          {!motionLogLoaded && motionLog ? ('Loading ...') :
+            motionLog.map((lg, i) => (<p key={i}>{lg}</p>))
+          }
+        </Segment>
+
+        {/* App Log */}
+        <Segment className='headings'>App Log</Segment>
+        <Segment style={{
+          maxHeight: '10rem',
+          overflowY: 'auto'
+        }}>
+          {!appLogLoaded && appLog ? ('Loading ...') :
+            appLog.map((lg, i) => (<p key={i}>{lg}</p>))
           }
         </Segment>
 

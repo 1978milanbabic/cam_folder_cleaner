@@ -30,7 +30,7 @@ const fileNameChecker = filename => {
   }
 }
 
-const fileNameChanger = event => {
+const fileNameChanger = async event => {
   const fileName = path.parse(event).name
   const fileExt = path.parse(event).ext
   if (isMedia(fileExt)) {
@@ -38,7 +38,8 @@ const fileNameChanger = event => {
     const nonANName = formatName(fileName, fileExt)
     let finalName = fileNameChecker(nonANName)
     // rename file
-    db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => File renamed and moving to Media dir...`).write()
+    await db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => File renamed and moved to Media dir`).write()
+
     fs.rename(
       path.join(mediaDir.uploaddir, fileName + fileExt),
       path.join(mediaDir.mediadir, finalName + fileExt),

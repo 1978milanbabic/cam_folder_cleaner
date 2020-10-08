@@ -90,7 +90,7 @@ const addLogWatcher = () => {
         }
         if (data) {
           // refresh medias on FE
-          fileEmitter.emit('refresh', 'logs')
+          fileEmitter.emit('refresh', 'motion logs')
           // read log file
           let lastLog = (data.split('\n').filter(row => row !== '').reverse())[0]
           lastLog.toString()
@@ -99,6 +99,8 @@ const addLogWatcher = () => {
           if (eventStarted > -1) {
             // log
             db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Event started!`).write()
+            // refresh FE
+            fileEmitter.emit('refresh', 'app logs')
             // starting new event
             let doSendMail = db.get('mail_on_event').value()
             // send email on new video
@@ -113,12 +115,15 @@ const addLogWatcher = () => {
             } else {
               db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Sending mail dissabled by user!`).write()
             }
+            fileEmitter.emit('refresh', 'app logs')
           }
           // check if in last log event ends
           let eventEnded = lastLog.indexOf('End of event')
           if (eventEnded > -1) {
             // log
             db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Event Ended!`).write()
+            // refresh FE
+            fileEmitter.emit('refresh', 'app logs')
             // event ended
             // move files to upload dir (standard timeout for meta on files)
             setTimeout(() => {
@@ -128,12 +133,16 @@ const addLogWatcher = () => {
                 exec(cmd, (error, stdout, stderr) => {
                   if (error) db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Error moving files at the end of the event: ${error}`)
                   if (stderr) db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Error moving files at the end of the event: ${stderr}`)
-                  db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Moving files to Upload dir at the end of the event: ${stdout}`).write()
+                  db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Moving files to Upload dir at the end of the event success ${stdout}`).write()
                 })
               } catch (err) {
                 db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Error moving files at the end of the event: ${err}`)
               }
-            }, 400);
+              setTimeout(() => {
+                // waiting for upload to media transport to ocure
+                fileEmitter.emit('refresh', 'app logs')
+              }, 850);
+            }, 400)
           }
         } else {
           console.log('no data')
