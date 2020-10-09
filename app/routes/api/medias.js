@@ -96,11 +96,13 @@ router.delete('/:id', async (req, res, err) => {
         if (error) db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Deletion error: ${error}`).write()
         if (stderr) db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Deletion process error: ${stderr}`).write()
         db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Deletion process success ${stdout}`).write()
-        // emit refresh log
-        fileEmitter.emit('refresh', 'app logs')
         // response to FE
         res.jsonp({deleted: picForDelete})
       })
+      // emit refresh log
+      setTimeout(() => {
+        fileEmitter.emit('refresh', 'app logs')
+      }, 400);
     } catch(err) {
       // log err
       db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Error executing delete command: ${err}`).write()
