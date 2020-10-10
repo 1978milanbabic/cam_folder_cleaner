@@ -9,8 +9,6 @@ const klaw = require('klaw')
 const { response } = require('express')
 const { exec } = require('child_process')
 const db = require('../../components/db')
-const { getVideoDurationInSeconds } = require('get-video-duration')
-const humanizeDuration = require('humanize-duration')
 const { fileEmitter } = require('../../utils/filesWatcher')
 const moment = require('moment')
 
@@ -46,11 +44,7 @@ router.get('/', async (req, res) => {
     // search if seen
     let thisSeen
     seen.filter(s => s === name).length > 0 ? thisSeen = true : thisSeen = false
-    // get video duration (in seconds)
-    let duration
-    await getVideoDurationInSeconds(file.path).then((dur) => {
-      duration = humanizeDuration(dur * 1000, { maxDecimalPoints: 1 })
-    })
+
     // create response object
     medias.push({
       name: name.replace('.mp4', '-01.jpg'),
@@ -59,8 +53,7 @@ router.get('/', async (req, res) => {
       created_at: file.stats.ctime,
       url: req.mediaUrl(name).replace('.mp4', '-01.jpg'),
       videoUrl: req.mediaUrl(name),
-      seen: thisSeen,
-      duration
+      seen: thisSeen
     })
   }
   medias = medias.sort((a, b) => b.created_at - a.created_at)

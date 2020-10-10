@@ -161,7 +161,7 @@ const addLogWatcher = () => {
             }, 2 * 1000)
           }
           // save to DB read logs that have been read
-          db.set('logs_read', allLogsLength)
+          db.set('logs_read', allLogsLength).write()
         } else {
           console.log('no data')
         }
