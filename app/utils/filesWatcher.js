@@ -131,6 +131,8 @@ const addLogWatcher = () => {
             setTimeout(() => {
               fileEmitter.emit('refresh', 'app logs')
             }, 50)
+            // set event read
+            db.set('logs_read', allLogsLength).write()
           }
           // check if in last log event ends
           if (containsEvent(unreadLogs, 'End of event')) {
@@ -159,9 +161,9 @@ const addLogWatcher = () => {
                 fileEmitter.emit('refresh', 'app logs')
               }, 1000)
             }, 2 * 1000)
+            // set event read
+            db.set('logs_read', allLogsLength).write()
           }
-          // save to DB read logs that have been read
-          db.set('logs_read', allLogsLength).write()
         } else {
           console.log('no data')
         }
