@@ -9,6 +9,7 @@ const nodemailer = require('nodemailer')
 const fs = require('fs')
 const moment = require('moment')
 const db = require('../components/db')
+const _ = require('lodash')
 
 // mail
 const transporter = nodemailer.createTransport({
@@ -72,6 +73,16 @@ const addMediaFilesWatcher = () => {
   })
 }
 
+// event name/type recognize
+const containsEvent = (nonReadPartOfLogArr, eventString) => {
+  let found = false
+  nonReadPartOfLogArr.forEach(log => {
+    let logStr = log.toString()
+    if (logStr.indexOf(eventString) > -1) found = true
+  })
+  return found
+}
+
 // log watcher
 let logWatcher
 const addLogWatcher = () => {
@@ -91,13 +102,15 @@ const addLogWatcher = () => {
           // refresh medias on FE
           setTimeout(() => {
             fileEmitter.emit('refresh', 'motion logs')
-          }, 50);
+          }, 50)
           // read log file
-          let lastLog = (data.split('\n').filter(row => row !== '').reverse())[0]
-          lastLog.toString()
+          let allLogs = (data.split('\n').filter(row => row !== '').reverse())
+          let allLogsLength = allLogs.length
+          let readLogs = db.get('logs_read').value()
+          let unreadLogsLength = allLogsLength - readLogs
+          let unreadLogs = _.takeRight(allLogs, unreadLogsLength)
           // check if in last log event starts
-          let eventStarted = lastLog.indexOf('starting event')
-          if (eventStarted > -1) {
+          if (containsEvent(unreadLogs, 'starting event')) {
             // log
             db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Event started!`).write()
             // starting new event
@@ -120,8 +133,7 @@ const addLogWatcher = () => {
             }, 50)
           }
           // check if in last log event ends
-          let eventEnded = lastLog.indexOf('End of event')
-          if (eventEnded > -1) {
+          if (containsEvent(unreadLogs, 'End of event')) {
             // log
             db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Event Ended!`).write()
             // refresh FE
@@ -145,9 +157,11 @@ const addLogWatcher = () => {
               setTimeout(() => {
                 // waiting for upload to media transport to ocure
                 fileEmitter.emit('refresh', 'app logs')
-              }, 1000);
-            }, 10 * 1000)
+              }, 1000)
+            }, 2 * 1000)
           }
+          // save to DB read logs that have been read
+          db.set('logs_read', allLogsLength)
         } else {
           console.log('no data')
         }

@@ -8,3 +8,4 @@ Node server, workers and React FE for "motion.py" (server with admin page)
 10. CONFIG PAGE !!!
 11. set time based on real creation time!
 12. add clear logs delete btns
+13. YOU CANNOT LISTEN TO MOTION LOG FILE BECAUSE IT GIVES YOU MULTIPLE LINES AT A TIME!!!

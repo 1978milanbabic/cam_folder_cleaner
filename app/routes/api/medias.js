@@ -49,7 +49,7 @@ router.get('/', async (req, res) => {
     // get video duration (in seconds)
     let duration
     await getVideoDurationInSeconds(file.path).then((dur) => {
-      duration = humanizeDuration(dur * 1000)
+      duration = humanizeDuration(dur * 1000, { maxDecimalPoints: 1 })
     })
     // create response object
     medias.push({
@@ -107,14 +107,18 @@ router.delete('/:id', async (req, res, err) => {
       // log err
       db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Error executing delete command: ${err}`).write()
       // emit refresh log
-      fileEmitter.emit('refresh', 'app logs')
+      setTimeout(() => {
+        fileEmitter.emit('refresh', 'app logs')
+      }, 400)
     }
   } else {
     // file does not exist
     // log 'file does not exist'
     db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Error: File for deletion does not exists!`).write()
     // emit refresh log
-    fileEmitter.emit('refresh', 'app logs')
+    setTimeout(() => {
+      fileEmitter.emit('refresh', 'app logs')
+    }, 400)
     res.jsonp({
       deleted: 'false'
     })
