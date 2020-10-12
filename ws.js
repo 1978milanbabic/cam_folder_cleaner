@@ -12,15 +12,6 @@ const socketServer = serverToBind => {
     clientSocket.on('refresh', () => {
       wsServer.emit('refresh', 'refresh')
     })
-    clientSocket.on('motion', () => {
-      wsServer.emit('motion', 'motion')
-    })
-    clientSocket.on('detect', args => {
-      wsServer.emit('detect', args)
-    })
-    clientSocket.on('image', args => {
-      wsServer.emit('image', args)
-    })
   })
 
   return wsServer

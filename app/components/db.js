@@ -14,8 +14,7 @@ defaultDB.defaults({
   user: {'user1@example.com': '1892eb34'},
   alert_email: 'user1@example.com',
   mail_on_event: false,
-  seen_video: [],
-  logs_read: 0
+  seen_video: []
 }).write()
 
 statsDB.defaults({

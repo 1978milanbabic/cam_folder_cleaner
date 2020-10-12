@@ -57,3 +57,6 @@ build/
 
 # electron-builder output
 dist/
+
+# vs code configuration files
+.vscode/
