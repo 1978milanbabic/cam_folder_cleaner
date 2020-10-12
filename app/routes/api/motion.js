@@ -6,6 +6,7 @@ const nodemailer = require('nodemailer')
 const db = require('../../components/db')
 const moment = require('moment')
 const { fileEmitter } = require('../../utils/filesWatcher')
+const config = require('../../components/config')
 
 // initialize router
 const router = express.Router()
