@@ -1,2 +1,2 @@
 #!/bin/bash
-python3 motion_end.py
+node /home/pi/Documents/projects/cam_folder_cleaner/python_calls/node_end.js

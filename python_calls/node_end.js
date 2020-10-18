@@ -14,7 +14,7 @@ const unPass = un + ':' + user[un]
 // request
 const hash = base64.encode(unPass)
 const Basic = 'Basic ' + hash
-axios.get('http://localhost:1337/api/motion/start', {
+axios.get('http://localhost:1337/api/motion/end', {
   headers: {'Authorization': Basic}
 }).then(response => {
   console.log(response.data)
