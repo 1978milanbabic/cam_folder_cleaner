@@ -1,2 +1,2 @@
 #!/bin/bash
-node node_start.js
+node /home/pi/Documents/projects/cam_folder_cleaner/python_calls/node_start.js

@@ -2,6 +2,7 @@
 
 // dependencies
 const nodemailer = require('nodemailer')
+const moment = require('moment')
 
 // mail
 const transporter = nodemailer.createTransport({
@@ -28,6 +29,7 @@ const sendMessage = params => {
   })
 }
 
+// mail
 try {
   sendMessage(moment().format('MMMM Do YYYY, h:mm:ss a') + ' --> ')
 } catch (err) {
