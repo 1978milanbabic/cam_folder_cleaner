@@ -3,6 +3,9 @@
 // dependencies
 const nodemailer = require('nodemailer')
 const moment = require('moment')
+const db = require('../app/components/db')
+// dotenv support
+require('../app/utils/dotenv').load()
 
 // mail
 const transporter = nodemailer.createTransport({
@@ -22,16 +25,26 @@ const sendMessage = params => {
   }
   transporter.sendMail(message, (err, info) => {
     if (err) {
-      console.log(err)
+      db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Mail transporter error: ${err}`).write()
     } else {
-      console.log('message sent')
+      db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Mail status: ${info && info.response}`).write()
     }
   })
 }
 
-// mail
-try {
-  sendMessage(moment().format('MMMM Do YYYY, h:mm:ss a') + ' --> ')
-} catch (err) {
-  console.log(err)
+// log
+db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Event started!`).write()
+// starting new event
+let doSendMail = db.get('mail_on_event').value()
+// send email on new video
+if (doSendMail) {
+  db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Initiating sending mail...`).write()
+  try {
+    sendMessage(moment().format('MMMM Do YYYY, h:mm:ss a') + ' --> ')
+    db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => New mail sent.`).write()
+  } catch (err) {
+    db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Error sending mail: ${err}`).write()
+  }
+} else {
+  db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Sending mail dissabled by user!`).write()
 }
