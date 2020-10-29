@@ -140,4 +140,10 @@ router.get('/streaming_url', (req, res) => {
   res.jsonp({ streaming: process.env.MOTION_STREAM_URL })
 })
 
+// clear log file
+router.get('/clearlog', async (req, res) => {
+  await db.stats.set('stats', []).write()
+  res.jsonp({ log: 'clear' })
+})
+
 exports = module.exports = router

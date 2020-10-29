@@ -214,8 +214,29 @@ const Home = () => {
     setVideoUrl(vid)
     setModalOpen(true)
   }
-  // handle close video modal
-
+  // handle clear motion log
+  const handleClearMotionLog = () => {
+    // send req to api
+    fetch('/api/motion/clearlog', {credentials: 'same-origin'})
+    .then(res => res.json())
+    .then(response => {
+      if (response.log === 'clear') {
+        setMotionLog(['No log file to load ...'])
+        loadAppLogFile()
+      } else {
+        window.alert('Error clearing log!')
+      }
+    })
+  }
+  // clear db log
+  const handleClearAppLog = () => {
+    // send req to api
+    fetch('/api/medias/clearlog', {credentials: 'same-origin'})
+    .then(res => res.json())
+    .then(response => {
+      response.log === 'clear' ? setAppLog(['No log file to load ...']) : window.alert('Error clearing log!')
+    })
+  }
 
   return (
     <Fragment>
@@ -247,7 +268,10 @@ const Home = () => {
         <Header attached='top' textAlign='center' className='headings'>Home</Header>
 
         {/* Motion Log */}
-        <Segment className='headings'>Motion Log</Segment>
+        <Menu className='headings' style={{margin: 0, borderRadius: 0, border: 0, borderTop: '1px solid rgba(34,36,38,.15)'}}>
+          <Menu.Item position='left'>Motion Log</Menu.Item>
+          <Menu.Item position='right'><Button onClick={handleClearMotionLog}>Clear</Button></Menu.Item>
+        </Menu>
         <Segment style={{
           maxHeight: '10rem',
           overflowY: 'auto'
@@ -258,7 +282,10 @@ const Home = () => {
         </Segment>
 
         {/* App Log */}
-        <Segment className='headings'>App Log</Segment>
+        <Menu className='headings' style={{margin: 0, borderRadius: 0, border: 0, borderTop: '1px solid rgba(34,36,38,.15)'}}>
+          <Menu.Item position='left'>App Log</Menu.Item>
+          <Menu.Item position='right'><Button onClick={handleClearAppLog}>Clear</Button></Menu.Item>
+        </Menu>
         <Segment style={{
           maxHeight: '10rem',
           overflowY: 'auto'

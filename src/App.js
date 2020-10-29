@@ -4,7 +4,7 @@ import {
   Menu,
   Responsive,
   Container,
-  Button
+  Checkbox
 } from 'semantic-ui-react'
 
 // scenes
@@ -18,24 +18,29 @@ import './App.scss'
 const App = () => {
   // stream link
   const [streamUrl, setStreamUrl] = useState()
+  // mailing alert
+  const [mailAlert, setMailAlert] = useState(false)
 
-  const doReboot = () =>  {
-    let ruSure = window.confirm('This will reboot system!')
-    if (ruSure) {
-      fetch('/api/reboot', {credentials: 'same-origin'})
-      .then(res => res.json())
-      .then(response => {
-        console.log(response)
-      })
-    }
-  }
   useEffect(() => {
     fetch('/api/medias/streaming_url', {credentials: 'same-origin'})
-      .then(res => res.json())
-      .then(response => {
-        setStreamUrl(response.streaming)
-      })
+    .then(res => res.json())
+    .then(response => {
+      setStreamUrl(response.streaming)
+    })
+    fetch('/api/motion/mail_alert', {credentials: 'same-origin'})
+    .then(res => res.json())
+    .then(response => {
+      setMailAlert(response.alert)
+    })
   }, [])
+
+  const setMailAlertOnOff = () => {
+    fetch('/api/motion/set_mail_alert', {credentials: 'same-origin'})
+    .then(res => res.json())
+    .then(response => {
+      setMailAlert(response.alert)
+    })
+  }
   return (
     <div className='App'>
       <Router>
@@ -50,7 +55,7 @@ const App = () => {
             Configuration
           </Menu.Item>
           <Menu.Item  position='right'>
-            <Button onClick={doReboot} color='red'>Reboot</Button>
+            Mail Alert:&emsp; <Checkbox toggle checked={mailAlert} onChange={setMailAlertOnOff} />
           </Menu.Item>
         </Responsive>
         <Container>

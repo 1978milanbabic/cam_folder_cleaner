@@ -7,9 +7,12 @@ const db = require('../../components/db')
 const moment = require('moment')
 const { fileEmitter } = require('../../utils/filesWatcher')
 const config = require('../../components/config')
+const bodyParser = require('body-parser')
+const { response } = require('express')
 
 // initialize router
 const router = express.Router()
+router.use(bodyParser.json())
 
 // mail
 const transporter = nodemailer.createTransport({
@@ -104,6 +107,49 @@ router.get('/end', (req, res) => {
     }, 1000)
   }, 2 * 1000)
   res.jsonp({event: 'ended'})
+})
+
+// get mail on motion alert settings
+router.get('/mail_alert', async (req, res) => {
+  let mailAlert = await db.get('mail_on_event').value()
+  res.jsonp({ alert: mailAlert })
+})
+
+// set mail on motion alert settings DB
+router.get('/set_mail_alert', async (req, res) => {
+  let mailAlert = await !db.get('mail_on_event').value()
+  await db.set('mail_on_event', mailAlert).write()
+  res.jsonp({ alert: mailAlert })
+})
+
+// get mail address
+router.get('/mail', async (req, res) => {
+  let email = await db.get('alert_email').value()
+  res.jsonp({ mail: email })
+})
+
+// set mail address
+router.post('/mail', async (req, res) => {
+  let email = req.body.mail
+  await db.set('alert_email', email).write()
+  res.jsonp({ mail: email })
+})
+
+// clear motion log
+router.get('/clearlog', async (req, res) => {
+  let cmd = `sudo truncate -s 0 ${config.motionlogdir}motion.log`
+  db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Clearing motion log file`).write()
+  try {
+    exec(cmd, (error, stdout, stderr) => {
+      if (error) db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Error clearing motion log file: ${error}`)
+      if (stderr) db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Error clearing motion log file: ${stderr}`)
+      db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Clearing motion log file success: ${stdout}`).write()
+      res.jsonp({ log: 'clear' })
+    })
+  } catch (err) {
+    db.stats.get('stats').push(`${moment().format('MMMM Do YYYY, h:mm:ss a')} => Error clearing motion log file: ${err}`)
+    res.end()
+  }
 })
 
 exports = module.exports = router
